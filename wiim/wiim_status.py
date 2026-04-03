@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import simple_parsing as sp
 from rich.console import Console
 
-from wiim_device import DEFAULT_HOST, api, now_playing
+from wiim_device import resolve_device, api, now_playing
 
 console = Console()
 
@@ -13,18 +13,19 @@ console = Console()
 class Args:
     """WiiM device status"""
     action: str = "now_playing"  # now_playing or device
-    host: str = DEFAULT_HOST     # WiiM device hostname or IP
+    device: str | None = None    # Device name (partial match OK). Auto-selects if only one device.
 
 
 args = sp.parse(Args)
+host = resolve_device(args.device)
 
 match args.action:
     case "now_playing":
-        info = now_playing(args.host)
+        info = now_playing(host)
         console.print_json(json.dumps(info))
 
     case "device":
-        info = api(args.host, "getStatusEx")
+        info = api(host, "getStatusEx")
         summary = {
             "name": info.get("DeviceName"),
             "firmware": info.get("firmware"),

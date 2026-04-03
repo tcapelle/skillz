@@ -1,10 +1,13 @@
+import json
+from pathlib import Path
+
 import requests
 import urllib3
 
 # Suppress self-signed cert warnings from WiiM/LinkPlay
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-DEFAULT_HOST = "192.168.1.13"
+DEVICES_FILE = Path.home() / ".wiim" / "devices.json"
 
 SOURCE_NAMES = {
     "0": "Idle",
@@ -27,6 +30,43 @@ LOOP_MODES = {
     "3": "Shuffle",
     "4": "Sequential",
 }
+
+
+def load_devices() -> dict[str, dict]:
+    """Load cached devices from ~/.wiim/devices.json."""
+    if not DEVICES_FILE.exists():
+        return {}
+    return json.loads(DEVICES_FILE.read_text())
+
+
+def save_devices(devices: dict[str, dict]):
+    """Save discovered devices to ~/.wiim/devices.json."""
+    DEVICES_FILE.parent.mkdir(exist_ok=True)
+    DEVICES_FILE.write_text(json.dumps(devices, indent=2))
+
+
+def resolve_device(name: str | None = None) -> str:
+    """Resolve a device name to an IP address. Auto-selects if only one device exists."""
+    devices = load_devices()
+    if not devices:
+        raise RuntimeError("No WiiM devices found. Run wiim_discover.py first.")
+
+    if name is None:
+        if len(devices) == 1:
+            return next(iter(devices.values()))["ip"]
+        names = list(devices.keys())
+        raise RuntimeError(f"Multiple devices found. Specify --device: {names}")
+
+    # Exact match first
+    if name in devices:
+        return devices[name]["ip"]
+
+    # Case-insensitive partial match
+    for dev_name, info in devices.items():
+        if name.lower() in dev_name.lower():
+            return info["ip"]
+
+    raise RuntimeError(f"Device '{name}' not found. Available: {list(devices.keys())}")
 
 
 def api(host: str, command: str) -> str | dict:

@@ -6,4 +6,5 @@ dependencies = [
     "requests",
     "rich",
     "simple-parsing",
+    "zeroconf",
 ]
