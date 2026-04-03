@@ -1,34 +1,48 @@
 ---
 name: wiim
-description: Control WiiM audio player — playback, volume, now playing, device discovery. Use when user wants to control music, check what's playing, or adjust volume on their WiiM.
+description: Control WiiM audio player and play Tidal music natively. Use when user wants to play music, control playback, adjust volume, or discover WiiM devices. Supports playing Tidal songs, albums, artists, and playlists at full Hi-Res quality.
 allowed-tools: Bash
 ---
 
 # WiiM Skill
 
-Control WiiM audio devices via local HTTPS API. Run `discover` first to find devices.
+Control WiiM devices and play Tidal music natively via UPnP. Run `discover` first.
 
-All commands: `uv run --project ${CLAUDE_SKILL_DIR} wiim <command> [value] [--device NAME]`
+All commands: `uv run --project ${CLAUDE_SKILL_DIR} ${CLAUDE_SKILL_DIR}/wiim_cli.py --command <cmd> [options]`
 
-`--device` accepts partial name match. Auto-selects if only one device exists.
+`--device` accepts partial name match. Auto-selects if only one device.
 
-## Commands
+## Play Tidal music (native Hi-Res)
 
 ```bash
-wiim discover [--timeout 5]       # Find WiiM devices on the network
-wiim status [--device NAME]       # What's currently playing
-wiim device [--device NAME]       # Device info (firmware, IP, etc.)
-wiim play                         # Resume playback
-wiim pause                        # Pause
-wiim toggle                       # Toggle play/pause
-wiim stop                         # Stop
-wiim next                         # Next track
-wiim prev                         # Previous track
-wiim volume                       # Get current volume
-wiim volume 50                    # Set volume (0-100)
-wiim mute                         # Mute
-wiim unmute                       # Unmute
-wiim seek 120                     # Seek to position (seconds)
-wiim loop shuffle                 # Loop mode: all, one, shuffle, sequential
-wiim play-url "http://url"        # Play a direct audio URL
+wiim --command play-tidal --value "Eye of the Tiger"                      # Search & play track
+wiim --command play-tidal --value "Claudio Arrau" --type artist           # Play artist top tracks
+wiim --command play-tidal --value "Chopin Nocturnes Arrau" --type album   # Play album
+wiim --command play-tidal --playlist_id "UUID"                            # Play Tidal playlist
+wiim --command play-tidal --value "jazz" --limit 30                       # Search with limit
+wiim --command play-tidal --value "Bach" --device "kitchen"               # Play on specific device
+```
+
+## Playback control
+
+```bash
+wiim --command status              # What's playing
+wiim --command play                # Resume
+wiim --command pause               # Pause
+wiim --command stop                # Stop
+wiim --command next                # Next track
+wiim --command prev                # Previous track
+wiim --command volume              # Get volume
+wiim --command volume --value 50   # Set volume (0-100)
+wiim --command mute                # Mute
+wiim --command unmute              # Unmute
+wiim --command seek --value 120    # Seek (seconds)
+wiim --command loop --value shuffle # Loop: all, one, shuffle, sequential
+```
+
+## Device management
+
+```bash
+wiim --command discover            # Find WiiM devices on network
+wiim --command device              # Device info (firmware, IP, etc.)
 ```

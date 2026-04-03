@@ -6,10 +6,17 @@ from urllib.parse import quote
 
 import requests
 import simple_parsing as sp
+import tidalapi
 import urllib3
 from rich.console import Console
 from zeroconf import ServiceBrowser, Zeroconf
 
+from tidal_bridge import (
+    build_queue_xml,
+    create_temp_playlist_and_play,
+    get_tidal_session,
+    push_queue_and_play,
+)
 from wiim_device import (
     api,
     hex_decode,
@@ -21,14 +28,24 @@ from wiim_device import (
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 console = Console()
 
+COMMANDS = [
+    "discover", "status", "device",
+    "play", "pause", "toggle", "stop", "next", "prev",
+    "volume", "mute", "unmute", "seek", "loop",
+    "play-url", "play-tidal",
+]
+
 
 @dataclass
 class Args:
     """Control WiiM audio devices"""
-    command: str              # discover, status, device, play, pause, toggle, stop, next, prev, volume, mute, unmute, seek, loop, play-url
-    value: str = ""           # Value for volume (0-100), seek (seconds), loop mode, or URL
+    command: str              # discover, status, device, play, pause, toggle, stop, next, prev, volume, mute, unmute, seek, loop, play-url, play-tidal
+    value: str = ""           # Value for volume/seek/loop/URL, or search query for play-tidal
     device: str | None = None # Device name (partial match OK, auto-selects if only one)
     timeout: int = 5          # Discovery timeout in seconds
+    type: str = "tracks"      # For play-tidal: tracks, album, artist, playlist
+    playlist_id: str = ""     # For play-tidal: play a specific Tidal playlist by ID
+    limit: int = 20           # For play-tidal: max tracks
 
 
 def cmd_discover(timeout: int):
@@ -74,6 +91,61 @@ def cmd_discover(timeout: int):
     console.print_json(json.dumps(devices, indent=2))
 
 
+def cmd_play_tidal(host: str, args):
+    session = get_tidal_session()
+
+    if args.playlist_id:
+        # Existing playlist — use its ID directly as SearchUrl
+        playlist = session.playlist(args.playlist_id)
+        tracks = list(playlist.items(limit=args.limit))
+        name = playlist.name
+        queue_xml = build_queue_xml(name, tracks, playlist_id=args.playlist_id)
+        console.print(f"[green]Playing {len(tracks)} track(s): {name}[/green]")
+        for i, t in enumerate(tracks[:5], 1):
+            console.print(f"  {i}. {t.name} — {t.artist.name}")
+        if len(tracks) > 5:
+            console.print(f"  ... and {len(tracks) - 5} more")
+        push_queue_and_play(host, name, queue_xml)
+        return
+
+    # Ad-hoc play: search → create temp playlist → push to WiiM → delete playlist
+    if args.type == "artist":
+        results = session.search(args.value, models=[tidalapi.Artist], limit=1)
+        artists = results.get("artists", [])
+        if not artists:
+            console.print(f"[red]No artist found for '{args.value}'[/red]")
+            return
+        artist = artists[0]
+        tracks = artist.get_top_tracks(limit=args.limit)
+        name = f"{artist.name} — Top Tracks"
+
+    elif args.type == "album":
+        results = session.search(args.value, models=[tidalapi.Album], limit=1)
+        albums = results.get("albums", [])
+        if not albums:
+            console.print(f"[red]No album found for '{args.value}'[/red]")
+            return
+        album = albums[0]
+        tracks = album.tracks()
+        name = f"{album.artist.name} — {album.name}"
+
+    else:
+        results = session.search(args.value, models=[tidalapi.Track], limit=args.limit)
+        tracks = results.get("tracks", [])
+        if not tracks:
+            console.print(f"[red]No tracks found for '{args.value}'[/red]")
+            return
+        name = f"Search: {args.value}"
+
+    console.print(f"[green]Playing {len(tracks)} track(s): {name}[/green]")
+    for i, t in enumerate(tracks[:5], 1):
+        console.print(f"  {i}. {t.name} — {t.artist.name}")
+    if len(tracks) > 5:
+        console.print(f"  ... and {len(tracks) - 5} more")
+
+    create_temp_playlist_and_play(session, host, name, tracks)
+
+
 def main():
     args = sp.parse(Args)
 
@@ -83,6 +155,8 @@ def main():
     host = resolve_device(args.device)
 
     match args.command:
+        case "play-tidal":
+            cmd_play_tidal(host, args)
         case "status":
             console.print_json(json.dumps(now_playing(host)))
         case "device":
