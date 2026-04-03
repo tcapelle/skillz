@@ -6,91 +6,40 @@ allowed-tools: Bash
 
 # Tidal API Skill
 
-Interact with the user's Tidal account via CLI scripts. All scripts use `tidalapi` directly — no server needed.
+Interact with Tidal via CLI. Session persisted at `~/.tidal/session.json`.
 
-Session is persisted at `~/.tidal/session.json`. If expired, scripts auto-open the browser for OAuth login.
+All commands: `uv run --project ${CLAUDE_SKILL_DIR} tidal <command> [options]`
 
-## Running scripts
-
-All scripts live in `${CLAUDE_SKILL_DIR}`. Run them with:
+## Commands
 
 ```bash
-uv run --project ${CLAUDE_SKILL_DIR} ${CLAUDE_SKILL_DIR}/<script>.py <args>
+# Auth
+tidal login                                     # Login via browser OAuth
+tidal login --status                            # Check session
+
+# Search (JSON output with IDs and Tidal URLs)
+tidal search --query "Beatles"                  # Search everything
+tidal search --query "Radiohead" --type artists # tracks, albums, artists, playlists
+tidal search --query "jazz" --limit 10
+
+# Favorites & recommendations
+tidal favorites --limit 30
+tidal recommend --track_ids "123,456" --limit 20        # From specific tracks
+tidal recommend --limit_seeds 10 --limit 20             # From favorites
+
+# Playlists
+tidal playlists                                          # List all
+tidal playlist-tracks --playlist_id UUID [--limit 0]     # Get tracks (0=all)
+tidal playlist-create --title "Name" --track_ids "1,2,3" [--description ""]
+tidal playlist-add --playlist_id UUID --track_ids "1,2"
+tidal playlist-remove --playlist_id UUID --track_ids "1" # Or --indices "0,3"
+tidal playlist-update --playlist_id UUID --title "New"
+tidal playlist-reorder --playlist_id UUID --from_index 5 --to_index 0
+tidal playlist-delete --playlist_id UUID
 ```
 
-## Scripts reference
+## Tips
 
-### tidal_auth.py — Authentication
-
-```bash
-# Login (opens browser if needed)
-uv run --project ${CLAUDE_SKILL_DIR} ${CLAUDE_SKILL_DIR}/tidal_auth.py
-
-# Check session status
-uv run --project ${CLAUDE_SKILL_DIR} ${CLAUDE_SKILL_DIR}/tidal_auth.py --status
-```
-
-### tidal_search.py — Search catalog
-
-```bash
-# Search everything
-uv run --project ${CLAUDE_SKILL_DIR} ${CLAUDE_SKILL_DIR}/tidal_search.py --query "Beatles"
-
-# Search specific type: tracks, albums, artists, playlists
-uv run --project ${CLAUDE_SKILL_DIR} ${CLAUDE_SKILL_DIR}/tidal_search.py --query "Radiohead" --type artists
-
-# With limit
-uv run --project ${CLAUDE_SKILL_DIR} ${CLAUDE_SKILL_DIR}/tidal_search.py --query "jazz" --type tracks --limit 10
-```
-
-Output is JSON with track/album/artist/playlist objects including IDs and Tidal URLs.
-
-### tidal_playlists.py — Playlist management
-
-```bash
-# List all playlists
-uv run --project ${CLAUDE_SKILL_DIR} ${CLAUDE_SKILL_DIR}/tidal_playlists.py --action list
-
-# Get tracks from a playlist
-uv run --project ${CLAUDE_SKILL_DIR} ${CLAUDE_SKILL_DIR}/tidal_playlists.py --action tracks --playlist_id "UUID"
-
-# Create playlist with tracks
-uv run --project ${CLAUDE_SKILL_DIR} ${CLAUDE_SKILL_DIR}/tidal_playlists.py --action create --title "My Playlist" --track_ids "123,456,789" --description "Optional desc"
-
-# Add tracks to existing playlist
-uv run --project ${CLAUDE_SKILL_DIR} ${CLAUDE_SKILL_DIR}/tidal_playlists.py --action add --playlist_id "UUID" --track_ids "123,456"
-
-# Remove tracks by ID or by 0-based index
-uv run --project ${CLAUDE_SKILL_DIR} ${CLAUDE_SKILL_DIR}/tidal_playlists.py --action remove --playlist_id "UUID" --track_ids "123"
-uv run --project ${CLAUDE_SKILL_DIR} ${CLAUDE_SKILL_DIR}/tidal_playlists.py --action remove --playlist_id "UUID" --indices "0,3,5"
-
-# Update title/description
-uv run --project ${CLAUDE_SKILL_DIR} ${CLAUDE_SKILL_DIR}/tidal_playlists.py --action update --playlist_id "UUID" --title "New Name"
-
-# Reorder: move track from position A to position B (0-based)
-uv run --project ${CLAUDE_SKILL_DIR} ${CLAUDE_SKILL_DIR}/tidal_playlists.py --action reorder --playlist_id "UUID" --from_index 5 --to_index 0
-
-# Delete playlist
-uv run --project ${CLAUDE_SKILL_DIR} ${CLAUDE_SKILL_DIR}/tidal_playlists.py --action delete --playlist_id "UUID"
-```
-
-### tidal_tracks.py — Favorites and recommendations
-
-```bash
-# Get favorite tracks
-uv run --project ${CLAUDE_SKILL_DIR} ${CLAUDE_SKILL_DIR}/tidal_tracks.py --action favorites --limit 30
-
-# Get recommendations from specific tracks
-uv run --project ${CLAUDE_SKILL_DIR} ${CLAUDE_SKILL_DIR}/tidal_tracks.py --action recommend --track_ids "123,456" --limit 20
-
-# Get recommendations from favorites (auto-uses favorites as seeds)
-uv run --project ${CLAUDE_SKILL_DIR} ${CLAUDE_SKILL_DIR}/tidal_tracks.py --action recommend --limit_seeds 10 --limit 20
-```
-
-## Workflow tips
-
-- **Creating a playlist from recommendations**: First run `tidal_tracks.py recommend`, pick track IDs from the output, then run `tidal_playlists.py create` with those IDs.
-- **Finding tracks to add**: Use `tidal_search.py` to find track IDs, then `tidal_playlists.py add`.
-- **Naming playlists**: Check existing playlists with `tidal_playlists.py list` first to match the user's naming style.
-- All data output is JSON — extract IDs directly for follow-up operations.
-- Tidal URLs are included in all results so users can open tracks/playlists directly.
+- All data output is JSON — extract IDs for follow-up operations.
+- Check existing playlists with `tidal playlists` first to match user's naming style.
+- Tidal URLs included in all results so users can open content directly.
