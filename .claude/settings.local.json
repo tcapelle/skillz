@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(wiim)",
+      "Bash(uv run:*)",
+      "mcp__plugin_telegram_telegram__reply"
+    ]
+  }
+}

@@ -8,7 +8,7 @@ allowed-tools:
 
 # /tidal:favorites — Favorites & Recommendations
 
-All commands: `uv run --project ${CLAUDE_SKILL_DIR}/../.. tidal --command <cmd> [options]`
+All commands: `tidal --command <cmd> [options]`
 
 ## Commands
 

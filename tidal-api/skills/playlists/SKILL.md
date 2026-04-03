@@ -8,7 +8,7 @@ allowed-tools:
 
 # /tidal:playlists — Playlist Management
 
-All commands: `uv run --project ${CLAUDE_SKILL_DIR}/../.. tidal --command <cmd> [options]`
+All commands: `tidal --command <cmd> [options]`
 
 ## Commands
 

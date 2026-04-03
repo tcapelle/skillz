@@ -8,7 +8,7 @@ allowed-tools:
 
 # /tidal:search — Search Tidal Catalog
 
-All commands: `uv run --project ${CLAUDE_SKILL_DIR}/../.. tidal --command search [options]`
+All commands: `tidal --command search [options]`
 
 ## Options
 
