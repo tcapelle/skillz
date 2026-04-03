@@ -3,7 +3,7 @@ revision = 3
 requires-python = ">=3.12"
 
 [options]
-exclude-newer = "2026-03-27T11:02:12.495382Z"
+exclude-newer = "2026-03-27T11:28:17.974932Z"
 exclude-newer-span = "P7D"
 
 [[package]]
@@ -206,8 +206,8 @@ wheels = [
 
 [[package]]
 name = "wiim"
-version = "0.1.0"
-source = { virtual = "." }
+version = "0.2.0"
+source = { editable = "." }
 dependencies = [
     { name = "requests" },
     { name = "rich" },

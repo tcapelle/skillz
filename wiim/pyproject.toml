@@ -1,6 +1,6 @@
 [project]
 name = "wiim"
-version = "0.1.0"
+version = "0.2.0"
 requires-python = ">=3.12"
 dependencies = [
     "requests",
@@ -8,3 +8,14 @@ dependencies = [
     "simple-parsing",
     "zeroconf",
 ]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel.force-include]
+"wiim_cli.py" = "wiim_cli.py"
+"wiim_device.py" = "wiim_device.py"
+
+[project.scripts]
+wiim = "wiim_cli:main"
