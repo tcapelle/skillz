@@ -1,4 +1,7 @@
-#!/usr/bin/env python3
+# /// script
+# dependencies = ["faster-whisper"]
+# requires-python = ">=3.10"
+# ///
 """Transcribe audio files using faster-whisper (local, no API key needed)."""
 
 import argparse

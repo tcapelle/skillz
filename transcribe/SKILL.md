@@ -13,22 +13,22 @@ Local speech-to-text using faster-whisper. Runs on-device, no API key required.
 ## Usage
 
 ```bash
-uv run --project /Users/thomascapelle/skillz/transcribe /Users/thomascapelle/skillz/transcribe/transcribe_cli.py <audio_file>
+uv run ${CLAUDE_SKILL_DIR}/transcribe_cli.py <audio_file>
 ```
 
 ## Options
 
 ```bash
 # Transcribe with auto language detection (default model: base)
-transcribe voice.ogg
+transcribe_cli.py voice.ogg
 
 # Use a larger model for better accuracy
-transcribe voice.ogg --model small
-transcribe voice.ogg --model medium
+transcribe_cli.py voice.ogg --model small
+transcribe_cli.py voice.ogg --model medium
 
 # Force a specific language
-transcribe voice.ogg --language en
-transcribe voice.ogg --language es
+transcribe_cli.py voice.ogg --language en
+transcribe_cli.py voice.ogg --language es
 ```
 
 ## Models (accuracy vs speed tradeoff)
@@ -49,5 +49,5 @@ Voice messages from Telegram arrive as `.oga` files. Convert with ffmpeg first:
 
 ```bash
 ffmpeg -i message.oga /tmp/voice.mp3 -y
-uv run --project /Users/thomascapelle/skillz/transcribe /Users/thomascapelle/skillz/transcribe/transcribe_cli.py /tmp/voice.mp3
+uv run ${CLAUDE_SKILL_DIR}/transcribe_cli.py /tmp/voice.mp3
 ```
