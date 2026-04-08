@@ -1,65 +1,74 @@
 # skillz
-Small collection of local music-control skills and CLIs.
-This repo currently contains two Python tools:
-- `tidal-api`: a CLI for authenticating with Tidal, searching the catalog, browsing favorites, getting recommendations, and managing playlists
-- `wiim`: a CLI for discovering and controlling WiiM devices, including native Tidal playback on a selected speaker
-Each tool is self-contained in its own directory, with its own `pyproject.toml`, lockfile, and usage notes in `SKILL.md`.
-## Repo Layout
-```text
-.
-├── tidal-api/
-│   ├── SKILL.md
-│   ├── pyproject.toml
-│   ├── tidal_cli.py
-│   └── tidal_session.py
-└── wiim/
-    ├── SKILL.md
-    ├── pyproject.toml
-    ├── wiim_cli.py
-    ├── wiim_device.py
-    └── tidal_bridge.py
-```
+Small collection of local Claude Code skills for music control and audio.
+
+## Skills
+
+| Skill | Description |
+|-------|-------------|
+| `tidal` | Search Tidal catalog, manage playlists, get favorites and recommendations |
+| `wiim` | Discover and control WiiM devices, including native Tidal playback |
+| `transcribe` | Local speech-to-text via faster-whisper (no API key needed) |
+
 ## Requirements
 - Python `3.12+`
 - [`uv`](https://docs.astral.sh/uv/)
-- Access to a local network with a WiiM device for the `wiim` tool
-- A Tidal account for `tidal-api` and Tidal playback through `wiim`
-## Quick Start
-Install dependencies per tool:
+- A Tidal account for `tidal` and Tidal playback through `wiim`
+- A WiiM device on your local network for the `wiim` skill
+- A compatible GPU or CPU for `transcribe` (runs locally via faster-whisper)
+
+## Setup
+
+Skills are symlinked into `~/.claude/skills/`:
+
 ```bash
-cd tidal-api
-uv sync
-cd ../wiim
-uv sync
+ln -sf $(pwd)/tidal ~/.claude/skills/tidal
+ln -sf $(pwd)/wiim ~/.claude/skills/wiim
+ln -sf $(pwd)/transcribe ~/.claude/skills/transcribe
 ```
-Run commands with `uv run --project` from the repo root, or from inside each directory.
-## Tidal API
-Authenticate once:
+
+## Tidal
+
+Standalone uv script — no project install needed.
+
 ```bash
-uv run --project tidal-api tidal login
+uv run tidal/tidal_cli.py login                          # Auth via browser OAuth
+uv run tidal/tidal_cli.py search --query "Radiohead"     # Search catalog
+uv run tidal/tidal_cli.py favorites --limit 20           # Recent favorites
+uv run tidal/tidal_cli.py playlists                      # List playlists
+uv run tidal/tidal_cli.py recommend --limit 20           # Recommendations from favorites
 ```
-Common commands:
-```bash
-uv run --project tidal-api tidal search --query "Radiohead"
-uv run --project tidal-api tidal favorites --limit 20
-uv run --project tidal-api tidal playlists
-uv run --project tidal-api tidal recommend --limit 20
-```
-More examples live in `tidal-api/SKILL.md`.
+
 ## WiiM
-Discover devices first:
+
 ```bash
-uv run --project wiim wiim --command discover
-```
-Common commands:
-```bash
-uv run --project wiim wiim --command status
-uv run --project wiim wiim --command volume --value 50
+uv run --project wiim wiim --command discover            # Find devices
+uv run --project wiim wiim --command status               # Playback status
+uv run --project wiim wiim --command volume --value 50    # Set volume
 uv run --project wiim wiim --command play-tidal --value "Eye of the Tiger"
-uv run --project wiim wiim --command play-tidal --value "Bach" --device "kitchen"
 ```
-More examples live in `wiim/SKILL.md`.
-## Notes
-- `tidal-api` is useful on its own for search and playlist workflows
-- `wiim` builds on that idea by pushing Tidal playback to a WiiM device
-- The tools are intentionally lightweight and meant for local, personal automation
+
+## Transcribe
+
+```bash
+uv run --project transcribe transcribe audio.mp3         # Transcribe a file
+```
+
+## Repo Layout
+```text
+.
+├── tidal/
+│   ├── SKILL.md
+│   └── tidal_cli.py
+├── wiim/
+│   ├── SKILL.md
+│   ├── pyproject.toml
+│   ├── wiim_cli.py
+│   ├── wiim_device.py
+│   └── tidal_bridge.py
+└── transcribe/
+    ├── SKILL.md
+    ├── pyproject.toml
+    └── transcribe_cli.py
+```
+
+More details in each skill's `SKILL.md`.
