@@ -131,11 +131,31 @@ wait 3-5 secondes
 screenshot → vérifier le récapitulatif (jours + autre enfant)
 ```
 
-**Avant de valider, toujours demander confirmation à l'utilisateur.** Résumer clairement l'action, par exemple :
+**Avant de valider, toujours demander confirmation à l'utilisateur.** Présenter un tableau récapitulatif de la semaine montrant l'état résultant (après modifications) pour chaque enfant :
 
-> « Je vais désinscrire Hector et Alba de la cantine pour les jours suivants : lundi 28/04, mercredi 30/04. Dois-je valider ? »
+```
+┌──────────┬───────┬────────────────────┬────────────────────┐
+│   Jour   │ Date  │        Alba        │       Hector       │
+├──────────┼───────┼────────────────────┼────────────────────┤
+│ Lundi    │ 28/04 │ ✅ Cantine         │ ✅ Cantine         │
+├──────────┼───────┼────────────────────┼────────────────────┤
+│ Mardi    │ 29/04 │ ❌ Pas inscrit     │ ❌ Pas inscrit     │
+├──────────┼───────┼────────────────────┼────────────────────┤
+│ Mercredi │ 30/04 │ — (pas de cantine) │ — (pas de cantine) │
+├──────────┼───────┼────────────────────┼────────────────────┤
+│ Jeudi    │ 01/05 │ ❌ Pas inscrit     │ ❌ Pas inscrit     │
+├──────────┼───────┼────────────────────┼────────────────────┤
+│ Vendredi │ 02/05 │ ✅ Cantine         │ ✅ Cantine         │
+└──────────┴───────┴────────────────────┴────────────────────┘
+```
 
-Adapter le message selon le contexte (inscription/désinscription, enfants concernés, service, dates). Attendre la confirmation explicite de l'utilisateur avant de cliquer sur Valider.
+Règles du tableau :
+- Toujours afficher la semaine complète (lundi → vendredi).
+- Mercredi = toujours `— (pas de cantine)`.
+- `✅ Cantine` pour les jours inscrits, `❌ Pas inscrit` pour les jours non inscrits.
+- Si la modification ne concerne qu'un enfant, afficher quand même les deux colonnes avec l'état actuel de l'autre.
+
+Terminer par : « Dois-je valider ? » et attendre la confirmation explicite de l'utilisateur avant de cliquer sur Valider.
 
 Le bouton Valider est un `<button>`, pas un `<a>` :
 
