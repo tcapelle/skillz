@@ -1,5 +1,5 @@
 # skillz
-Small collection of local Claude Code skills for music control and audio.
+Small collection of local Claude Code skills for music control, audio, and daily life automation.
 
 ## Skills
 
@@ -8,6 +8,7 @@ Small collection of local Claude Code skills for music control and audio.
 | `tidal` | Search Tidal catalog, manage playlists, get favorites and recommendations |
 | `wiim` | Discover and control WiiM devices, including native Tidal playback |
 | `transcribe` | Local speech-to-text via faster-whisper (no API key needed) |
+| `cantine-ecole-enfants` | Manage school lunch and after-school reservations on Espace Famille Chambéry |
 
 ## Requirements
 - Python `3.12+`
@@ -15,6 +16,7 @@ Small collection of local Claude Code skills for music control and audio.
 - A Tidal account for `tidal` and Tidal playback through `wiim`
 - A WiiM device on your local network for the `wiim` skill
 - A compatible GPU or CPU for `transcribe` (runs locally via faster-whisper)
+- Espace Citoyens credentials (env vars) for `cantine-ecole-enfants`
 
 ## Setup
 
@@ -24,6 +26,7 @@ Skills are symlinked into `~/.claude/skills/`:
 ln -sf $(pwd)/tidal ~/.claude/skills/tidal
 ln -sf $(pwd)/wiim ~/.claude/skills/wiim
 ln -sf $(pwd)/transcribe ~/.claude/skills/transcribe
+ln -sf $(pwd)/cantine-ecole-enfants ~/.claude/skills/cantine-ecole-enfants
 ```
 
 ## Tidal
@@ -49,9 +52,15 @@ uv run --project wiim wiim --command play-tidal --value "Eye of the Tiger"
 
 ## Transcribe
 
+Standalone uv script — no project install needed.
+
 ```bash
-uv run --project transcribe transcribe audio.mp3         # Transcribe a file
+uv run transcribe/transcribe_cli.py audio.mp3            # Transcribe a file
 ```
+
+## Cantine École Enfants
+
+Browser-automation skill (no CLI) — manages school lunch and périscolaire reservations on Espace Famille Chambéry via Claude Code's browser tools. Requires `ESPACE_CITOYENS_LOGIN` and `ESPACE_CITOYENS_PASSWORD` env vars.
 
 ## Repo Layout
 ```text
@@ -65,10 +74,11 @@ uv run --project transcribe transcribe audio.mp3         # Transcribe a file
 │   ├── wiim_cli.py
 │   ├── wiim_device.py
 │   └── tidal_bridge.py
-└── transcribe/
-    ├── SKILL.md
-    ├── pyproject.toml
-    └── transcribe_cli.py
+├── transcribe/
+│   ├── SKILL.md
+│   └── transcribe_cli.py
+└── cantine-ecole-enfants/
+    └── SKILL.md
 ```
 
 More details in each skill's `SKILL.md`.
