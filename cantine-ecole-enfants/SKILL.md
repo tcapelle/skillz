@@ -100,7 +100,7 @@ JSON.stringify(r);
 [...document.querySelectorAll('a')].find(a => a.textContent.includes('tape 2')).click();
 ```
 
-### Step 6 — Vérifier et valider
+### Step 6 — Vérifier, demander confirmation et valider
 
 Le récapitulatif peut mettre quelques secondes à charger (modale "Merci de patienter..."). Attendre 3-5 secondes avant de prendre le screenshot.
 
@@ -109,7 +109,13 @@ wait 3-5 secondes
 screenshot → vérifier le récapitulatif (jours + autre enfant)
 ```
 
-Puis valider directement (ne pas demander confirmation). Le bouton Valider est un `<button>`, pas un `<a>` :
+**Avant de valider, toujours demander confirmation à l'utilisateur.** Résumer clairement l'action, par exemple :
+
+> « Je vais désinscrire Hector et Alba de la cantine pour les jours suivants : lundi 28/04, mercredi 30/04. Dois-je valider ? »
+
+Adapter le message selon le contexte (inscription/désinscription, enfants concernés, service, dates). Attendre la confirmation explicite de l'utilisateur avant de cliquer sur Valider.
+
+Le bouton Valider est un `<button>`, pas un `<a>` :
 
 ```javascript
 document.querySelector('button.btn-style3').click();
@@ -135,8 +141,9 @@ Donner un résumé clair à l'utilisateur : enfants, service, jours inscrits/dé
 | 6 | `screenshot` | Vérifier modifications (fond vert) |
 | 7 | `javascript_tool` | Clic "Aller à l'étape 2" |
 | 8 | `screenshot` | Vérifier récapitulatif |
-| 9 | `javascript_tool` | `document.querySelector('button.btn-style3').click()` |
-| 10 | `screenshot` | Lire confirmation → résumé utilisateur |
+| 9 | **confirmation** | Résumer l'action et demander confirmation à l'utilisateur |
+| 10 | `javascript_tool` | `document.querySelector('button.btn-style3').click()` |
+| 11 | `screenshot` | Lire confirmation → résumé utilisateur |
 
 ## Suivi des demandes
 
@@ -146,4 +153,4 @@ Demandes visibles dans "Mes démarches" : `/CompteCitoyen/MesDemandes`.
 
 - Session expire après inactivité — cliquer "Prolonger ma session" si modale apparaît.
 - Toujours utiliser la case "autre enfant" quand la modification concerne les deux.
-- Ne pas demander confirmation — valider directement et rapporter le résultat.
+- Toujours demander confirmation à l'utilisateur avant de valider (résumer enfants, service, dates).
